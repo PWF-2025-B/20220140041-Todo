@@ -20,16 +20,7 @@ class EnviromentTest extends TestCase
 
     public function testDefaultValue(): void
     {
-        $author = env("AUTHOR", "Ihsan");
-        self::assertEquals("Ihsan", $author);
+        $author = env("AUTHOR", "Eko");
+        self::assertEquals("Eko", $author);
     }
-
-    public function testEnviroment(): void
-    {
-        if(App::environment("testing")) {
-            echo "LOGIC IN TESTING ENV" . PHP_EOL;
-        }
-        self::assertTrue(true);
-    }
-
 }
