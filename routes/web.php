@@ -37,6 +37,11 @@ Route::middleware('auth')->group(function () {
     // ✅ Tambahan baru: hapus user
     Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
 
+
+});
+
+Route::middleware('admin')->group(function () {
+    Route::resource('user', UserController::class)->except(['show']);
     Route::patch('/user/{user}/makeadmin', [UserController::class, 'makeadmin'])->name('user.makeadmin');
     Route::patch('/user/{user}/removeadmin', [UserController::class, 'removeadmin'])->name('user.removeadmin');
 });
