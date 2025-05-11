@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Todo extends Model
+class Category extends Model
 {
     use HasFactory;
 
@@ -15,16 +15,14 @@ class Todo extends Model
      * @var array
      */
     protected $fillable = [
-        'title',
-        'category_id',
-        'is_complete',
+        'name',
     ];
 
     /**
-     * Get the category that owns the todo.
+     * Get the todos for the category.
      */
-    public function category()
+    public function todos()
     {
-        return $this->belongsTo(Category::class);
+        return $this->hasMany(Todo::class);
     }
 }

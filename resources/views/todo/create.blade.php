@@ -1,44 +1,38 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-            {{ __('Todo') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
-            <div class="p-6 text-gray-900 dark:text-gray-100">
-                <form method="post" action="{{ route('todo.store') }}" class="">
-                    @csrf
-                    @method('post')
+@section('content')
+<div class="container mx-auto py-6">
+    <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">Create Todo</h1>
 
-                    <div class="mb-6">
-                        <x-input-label for="title" :value="('Title')" />
-                        <x-text-input 
-                            id="title" 
-                            name="title" 
-                            type="text" 
-                            class="block w-full mt-1" 
-                            required 
-                            autofocus 
-                            autocomplete="title" 
-                        />
-                        <x-input-error class="mt-2" :messages="$errors->get('title')" />
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <x-primary-button>
-                            {{ __('Save') }}
-                        </x-primary-button>
-
-                        <x-link-button href="{{ route('todo.index') }}">
-                            {{ __('Cancel') }}
-                        </x-link-button>
-                    </div>
-                </form>
+        <form action="{{ route('todo.store') }}" method="POST">
+            @csrf
+            <div class="mb-4">
+                <label for="title" class="block text-sm font-medium mb-2">Title</label>
+                <input type="text" name="title" id="title" value="{{ old('title') }}" class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white" required>
             </div>
-        </div>
-        </div>
+
+            <div class="mb-4">
+                <label for="category_id" class="block text-sm font-medium mb-2">Category</label>
+                <select name="category_id" id="category_id" class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white">
+                    <option value="">Empty</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex items-center">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
+                    Save
+                </button>
+                <a href="{{ route('todo.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    Cancel
+                </a>
+            </div>
+        </form>
     </div>
-</x-app-layout>
+</div>
+@endsection

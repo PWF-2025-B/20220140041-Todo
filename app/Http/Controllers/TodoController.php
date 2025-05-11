@@ -3,111 +3,92 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class TodoController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $todos = Todo::where('user_id', auth()->user()->id)
-            ->orderBy('is_complete', 'asc')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $todosCompleted = Todo::where('user_id', auth()->user()->id)
-            ->where('is_complete', true)
-            ->count();
-
-        return view('todo.index', compact('todos', 'todosCompleted'));
+        $todos = Todo::with('category')->get();
+        return view('todo.index', compact('todos'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        return view('todo.create');
+        $categories = Category::all();
+        return view('todo.create', compact('categories'));
     }
 
-    public function edit(Todo $todo)
-    {
-        if (auth()->user()->id == $todo->user_id) {
-            return view('todo.edit', compact('todo'));
-        } else {
-            return redirect()->route('todo.index')->with('danger', 'You are not authorized to edit this todo!');
-        }
-    }
-
-    public function store(Request $request, Todo $todo)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|max:255',
+            'title' => 'required|string|max:255',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
-        $todo = Todo::create([
-            'title' => ucfirst($request->title),
-            'user_id' => auth()->user()->id,
+        Todo::create([
+            'title' => $request->title,
+            'category_id' => $request->category_id,
+            'is_complete' => false, // default status is 'ongoing'
         ]);
 
-        return redirect()->route('todo.index')->with('success', 'Todo created successfully!');
+        return redirect()->route('todo.index')->with('success', 'Todo created successfully.');
     }
 
-    public function complete(Todo $todo)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Todo $todo)
     {
-        if (auth()->user()->id == $todo->user_id) {
-            $todo->update([
-                'is_complete' => true,
-            ]);
-            return redirect()->route('todo.index')->with('success', 'Todo completed successfully!');
-        } else {
-            return redirect()->route('todo.index')->with('danger', 'You are not authorized to complete this todo!');
-        }
+        $categories = Category::all();
+        return view('todo.edit', compact('todo', 'categories'));
     }
 
-    public function uncomplete(Todo $todo)
-    {
-        if (auth()->user()->id == $todo->user_id) {
-            $todo->update([
-                'is_complete' => false,
-            ]);
-            return redirect()->route('todo.index')->with('success', 'Todo uncompleted successfully!');
-        } else {
-            return redirect()->route('todo.index')->with('danger', 'You are not authorized to uncomplete this todo!');
-        }
-    }
-
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, Todo $todo)
     {
         $request->validate([
-            'title' => 'required|max:255',
+            'title' => 'required|string|max:255',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $todo->update([
-            'title' => ucfirst($request->title),
+            'title' => $request->title,
+            'category_id' => $request->category_id,
         ]);
 
-        return redirect()->route('todo.index')->with('success', 'Todo updated successfully!');
+        return redirect()->route('todo.index')->with('success', 'Todo updated successfully.');
     }
 
-    // ✅ Tambahan baru: function untuk hapus satu todo
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Todo $todo)
     {
-        if (auth()->user()->id == $todo->user_id) {
-            $todo->delete();
-            return redirect()->route('todo.index')->with('success', 'Todo deleted successfully!');
-        } else {
-            return redirect()->route('todo.index')->with('danger', 'You are not authorized to delete this todo!');
-        }
+        $todo->delete();
+        return redirect()->route('todo.index')->with('success', 'Todo deleted successfully.');
     }
 
-    // ✅ Tambahan baru: function untuk hapus semua todo completed
-    public function destroyCompleted()
+    /**
+     * Toggle the completion status of the todo.
+     */
+    public function toggleComplete(Todo $todo)
     {
-        $todosCompleted = Todo::where('user_id', auth()->user()->id)
-            ->where('is_complete', true)
-            ->get();
+        $todo->is_complete = !$todo->is_complete;
+        $todo->save();
 
-        foreach ($todosCompleted as $todo) {
-            $todo->delete();
-        }
-
-        return redirect()->route('todo.index')->with('success', 'All completed todos deleted successfully!');
+        return redirect()->route('todo.index')->with('success', 'Todo status updated successfully.');
     }
 }
