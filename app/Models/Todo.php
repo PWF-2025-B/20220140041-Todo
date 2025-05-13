@@ -14,11 +14,12 @@ class Todo extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'title',
-        'category_id',
-        'is_complete',
-    ];
+  protected $fillable = [
+    'title',
+    'category_id',
+    'is_complete',
+    'user_id',
+];
 
     /**
      * Get the category that owns the todo.

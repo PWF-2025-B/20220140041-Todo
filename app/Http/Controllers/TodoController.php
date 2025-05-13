@@ -8,27 +8,22 @@ use Illuminate\Http\Request;
 
 class TodoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Hanya tampilkan todo milik user yang login
     public function index()
     {
-        $todos = Todo::with('category')->get();
+        $todos = Todo::with('category')
+            ->where('user_id', auth()->id())
+            ->get();
+
         return view('todo.index', compact('todos'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $categories = Category::all();
         return view('todo.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -39,26 +34,29 @@ class TodoController extends Controller
         Todo::create([
             'title' => $request->title,
             'category_id' => $request->category_id,
-            'is_complete' => false, // default status is 'ongoing'
+            'is_complete' => false,
+            'user_id' => auth()->id(), // ✅ penting
         ]);
 
         return redirect()->route('todo.index')->with('success', 'Todo created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Todo $todo)
     {
+        if ($todo->user_id !== auth()->id()) {
+            abort(403); // 🔒 hanya pemilik yang bisa akses
+        }
+
         $categories = Category::all();
         return view('todo.edit', compact('todo', 'categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Todo $todo)
     {
+        if ($todo->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
@@ -72,20 +70,22 @@ class TodoController extends Controller
         return redirect()->route('todo.index')->with('success', 'Todo updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Todo $todo)
     {
+        if ($todo->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $todo->delete();
         return redirect()->route('todo.index')->with('success', 'Todo deleted successfully.');
     }
 
-    /**
-     * Toggle the completion status of the todo.
-     */
     public function toggleComplete(Todo $todo)
     {
+        if ($todo->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $todo->is_complete = !$todo->is_complete;
         $todo->save();
 
