@@ -5,17 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Todo;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TodoController extends Controller
 {
-    // Hanya tampilkan todo milik user yang login
+    // Hanya tampilkan todo milik user yang login dengan sorting dan pagination
     public function index()
     {
         $todos = Todo::with('category')
-            ->where('user_id', auth()->id())
-            ->get();
+            ->where('user_id', Auth::id())
+            ->orderBy('is_done', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
-        return view('todo.index', compact('todos'));
+        $todoCompleted = Todo::where('user_id', Auth::id())
+            ->where('is_done', true)
+            ->count();
+
+        return view('todo.index', compact('todos', 'todoCompleted'));
     }
 
     public function create()
@@ -34,8 +41,8 @@ class TodoController extends Controller
         Todo::create([
             'title' => $request->title,
             'category_id' => $request->category_id,
-            'is_complete' => false,
-            'user_id' => auth()->id(), // ✅ penting
+            'is_done' => false,
+            'user_id' => auth()->id(),
         ]);
 
         return redirect()->route('todo.index')->with('success', 'Todo created successfully.');
@@ -44,7 +51,7 @@ class TodoController extends Controller
     public function edit(Todo $todo)
     {
         if ($todo->user_id !== auth()->id()) {
-            abort(403); // 🔒 hanya pemilik yang bisa akses
+            abort(403);
         }
 
         $categories = Category::all();
@@ -86,7 +93,7 @@ class TodoController extends Controller
             abort(403);
         }
 
-        $todo->is_complete = !$todo->is_complete;
+        $todo->is_done = !$todo->is_done;
         $todo->save();
 
         return redirect()->route('todo.index')->with('success', 'Todo status updated successfully.');

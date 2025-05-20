@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
@@ -12,7 +13,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::withCount('todos')->get();
+        $categories = Category::with('todo')
+            ->where('user_id', Auth::id())
+            ->get();
+
         return view('category.index', compact('categories'));
     }
 
@@ -35,6 +39,7 @@ class CategoryController extends Controller
 
         Category::create([
             'name' => $request->name,
+            'user_id' => Auth::id(), // tambahkan agar hanya untuk user yg login
         ]);
 
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
@@ -45,6 +50,11 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
+        // hanya izinkan user pemilik kategori
+        if ($category->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         return view('category.edit', compact('category'));
     }
 
@@ -53,6 +63,10 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        if ($category->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
@@ -69,6 +83,10 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        if ($category->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $category->delete();
         return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
     }
