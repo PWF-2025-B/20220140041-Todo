@@ -14,12 +14,12 @@ class TodoController extends Controller
     {
         $todos = Todo::with('category')
             ->where('user_id', Auth::id())
-            ->orderBy('is_done', 'asc')
+            ->orderBy('is_complete', 'asc')      // ✅ UBAH: is_done → is_complete
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         $todoCompleted = Todo::where('user_id', Auth::id())
-            ->where('is_done', true)
+            ->where('is_complete', true)         // ✅ UBAH: is_done → is_complete
             ->count();
 
         return view('todo.index', compact('todos', 'todoCompleted'));
@@ -41,7 +41,7 @@ class TodoController extends Controller
         Todo::create([
             'title' => $request->title,
             'category_id' => $request->category_id,
-            'is_done' => false,
+            'is_complete' => false,              // ✅ UBAH: is_done → is_complete
             'user_id' => auth()->id(),
         ]);
 
@@ -93,7 +93,7 @@ class TodoController extends Controller
             abort(403);
         }
 
-        $todo->is_done = !$todo->is_done;
+        $todo->is_complete = !$todo->is_complete;  // ✅ UBAH: is_done → is_complete
         $todo->save();
 
         return redirect()->route('todo.index')->with('success', 'Todo status updated successfully.');
