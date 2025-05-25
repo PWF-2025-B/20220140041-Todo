@@ -33,11 +33,11 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <form action="{{ route('todo.toggleComplete', $todo) }}" method="POST" class="inline">
+                            <form action="{{ route('todo.toggle', $todo->id) }}" method="POST" style="display:inline">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="text-green-400 hover:text-green-600 mr-3">
-                                    {{ $todo->is_complete ? 'Undo' : 'Complete' }}
+                                <button type="submit" class="text-blue-600 dark:text-blue-400">
+                                    {{ $todo->is_done ? 'Mark as Incomplete' : 'Complete' }}
                                 </button>
                             </form>
                             <a href="{{ route('todo.edit', $todo) }}" class="text-blue-400 hover:text-blue-600 mr-3">

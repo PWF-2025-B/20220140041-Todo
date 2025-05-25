@@ -32,10 +32,6 @@ class UserController extends Controller
 
     public function makeadmin(User $user)
     {
-        if ($user->id == 1) {
-            return back()->with('danger', 'Cannot change this user.');
-        }
-
         $user->timestamps = false;
         $user->is_admin = true;
         $user->save();
@@ -52,8 +48,15 @@ class UserController extends Controller
 
             return back()->with('success', 'Remove admin successfully!');
         } else {
-            return redirect()->route('user.index')->with('danger', 'Cannot modify this user!');
+            return redirect()->route('user.index');
         }
+    }
+
+    public function show($id)
+    {
+        $user = User::findOrFail($id);
+
+        return view('user.show', compact('user'));
     }
 
     public function destroy(User $user)
