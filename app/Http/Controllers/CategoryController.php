@@ -9,7 +9,8 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::with('todos')->where('user_id', auth()->id())->get();
+        // ✅ Query paling sederhana tanpa relasi yang bermasalah
+        $categories = Category::all();
         return view('categories.index', compact('categories'));
     }
 
@@ -20,14 +21,15 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['title' => 'required|string|max:255']);
+        $request->validate([
+            'title' => 'required|string|max:255|min:3',
+        ]);
 
         Category::create([
             'title' => $request->title,
-            'user_id' => auth()->id(),
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+        return redirect()->route('categories.index')->with('success', 'Category created successfully!');
     }
 
     public function edit(Category $category)
@@ -37,16 +39,20 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $request->validate(['title' => 'required|string|max:255']);
+        $request->validate([
+            'title' => 'required|string|max:255|min:3',
+        ]);
 
-        $category->update(['title' => $request->title]);
+        $category->update([
+            'title' => $request->title,
+        ]);
 
-        return redirect()->route('categories.index')->with('success', 'Category updated.');
+        return redirect()->route('categories.index')->with('success', 'Category updated successfully!');
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
-        return redirect()->route('categories.index')->with('danger', 'Category deleted.');
+        return redirect()->route('categories.index')->with('success', 'Category deleted successfully!');
     }
 }

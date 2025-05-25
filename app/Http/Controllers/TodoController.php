@@ -98,4 +98,38 @@ class TodoController extends Controller
 
         return redirect()->route('todo.index')->with('success', 'Todo status updated successfully.');
     }
+
+    // Method tambahan jika ada
+    public function complete(Todo $todo)
+    {
+        if ($todo->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $todo->is_complete = true;               // ✅ UBAH: is_done → is_complete
+        $todo->save();
+
+        return redirect()->route('todo.index')->with('success', 'Todo marked as completed.');
+    }
+
+    public function uncomplete(Todo $todo)
+    {
+        if ($todo->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $todo->is_complete = false;              // ✅ UBAH: is_done → is_complete
+        $todo->save();
+
+        return redirect()->route('todo.index')->with('success', 'Todo marked as incomplete.');
+    }
+
+    public function destroyCompleted()
+    {
+        Todo::where('user_id', auth()->id())
+            ->where('is_complete', true)         // ✅ UBAH: is_done → is_complete
+            ->delete();
+
+        return redirect()->route('todo.index')->with('success', 'All completed todos deleted.');
+    }
 }

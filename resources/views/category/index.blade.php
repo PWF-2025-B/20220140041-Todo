@@ -1,44 +1,83 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Todo Category') }}
+        </h2>
+    </x-slot>
 
-@section('content')
-<div class="container mx-auto py-6">
-    <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
-        <h1 class="text-2xl font-bold mb-6">Todo Category</h1>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
+                <div class="p-6 text-xl text-gray-900 dark:text-gray-100">
+                    <div class="flex items-center justify-between">
+                        {{-- Tombol Create --}}
+                        <x-create-button href="{{ route('category.create') }}" />
 
-        <div class="mb-4">
-            <a href="{{ route('categories.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                CREATE
-            </a>
-        </div>
+                        {{-- Notifikasi --}}
+                        <div>
+                            @if (session('success'))
+                                <p x-data="{ show: true }" x-show="show" x-transition
+                                   x-init="setTimeout(() => show = false, 5000)"
+                                   class="text-sm text-green-600 dark:text-green-400">
+                                    {{ session('success') }}
+                                </p>
+                            @endif
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-gray-700 border border-gray-600 rounded-lg">
-                <thead class="bg-gray-600">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">NAME</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">TODOS</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">ACTION</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-600">
-                    @foreach ($categories as $category)
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $category->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $category->todos_count }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <form action="{{ route('categories.destroy', $category) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-700" onclick="return confirm('Are you sure you want to delete this category?')">
-                                    Delete
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            @if (session('danger'))
+                                <p x-data="{ show: true }" x-show="show" x-transition
+                                   x-init="setTimeout(() => show = false, 5000)"
+                                   class="text-sm text-red-600 dark:text-red-400">
+                                    {{ session('danger') }}
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Tabel Category --}}
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-6">
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Title</th>
+                                <th scope="col" class="px-6 py-3">Todo</th>
+                                <th scope="col" class="px-6 py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($categories as $category)
+                                <tr class="odd:bg-white odd:dark:bg-gray-800 even:bg-gray-50 even:dark:bg-gray-700">
+                                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                        <a href="{{ route('category.edit', $category) }}" class="hover:underline">
+                                            {{ $category->title }}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                        {{ $category->todos->count() }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <form action="{{ route('category.destroy', $category) }}" method="POST"
+                                              onsubmit="return confirm('Are you sure you want to delete this category?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 dark:text-red-400">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-center font-medium text-gray-900 dark:text-white">
+                                        Empty
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>
