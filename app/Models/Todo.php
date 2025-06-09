@@ -9,21 +9,18 @@ class Todo extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-  protected $fillable = [
-    'title',
-    'category_id',
-    'is_complete',
-    'user_id',
-];
+    protected $fillable = [
+        'title',
+        'user_id',
+        'category_id',
+        'is_done'
+    ];
 
-    /**
-     * Get the category that owns the todo.
-     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

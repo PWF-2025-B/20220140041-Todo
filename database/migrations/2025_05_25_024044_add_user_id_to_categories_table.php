@@ -4,22 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void
+return new class extends Migration
+{
+    public function up()
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->after('id');
-
-            // Opsional: tambahkan foreign key jika ingin relasi ke tabel users
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            if (!Schema::hasColumn('categories', 'user_id')) {
+                $table->unsignedBigInteger('user_id')->after('id');
+            }
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropColumn('user_id');
+            if (Schema::hasColumn('categories', 'user_id')) {
+                $table->dropColumn('user_id');
+            }
         });
     }
 };
